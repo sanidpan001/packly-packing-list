@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Packly — Free Packing List Generator & Travel Packing Checklist</title>
+<meta name="description" content="Packly is a free packing list generator: build a smart what-to-pack checklist with capsule-wardrobe outfit math, a 3-1-1 liquids planner, forget-risk reminders, luggage weight checks and a printable travel packing checklist.">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: { paper: '#F4EFE6', packred: '#B5533C', packblue: '#2E5A88', ink: '#2B2620' },
+      fontFamily: {
+        display: ['Oswald', 'Arial Narrow', 'sans-serif'],
+        mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace']
+      }
+    }
+  }
+};
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  body { background: #F4EFE6; }
+  .perf-line {
+    height: 2px;
+    background-image: linear-gradient(90deg, rgba(181,83,60,.65) 55%, transparent 45%);
+    background-size: 16px 2px;
+    background-repeat: repeat-x;
+  }
+  .notch { position: absolute; top: 50%; width: 26px; height: 26px; border-radius: 9999px; background: #F4EFE6; transform: translateY(-50%); }
+  .stamp {
+    display: inline-block;
+    border: 3px double #B5533C;
+    color: #B5533C;
+    font-family: "IBM Plex Mono", monospace;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    padding: .35rem .9rem;
+    border-radius: .35rem;
+    transform: rotate(-7deg);
+    opacity: .92;
+    background: rgba(181,83,60,.06);
+  }
+  .stamp.blue { border-color: #2E5A88; color: #2E5A88; background: rgba(46,90,136,.06); }
+  .stamp.green { border-color: #2F7D4F; color: #2F7D4F; background: rgba(47,125,79,.06); }
+  .barcode {
+    background-image: repeating-linear-gradient(90deg, #2B2620 0 2px, transparent 2px 5px, #2B2620 5px 6px, transparent 6px 11px, #2B2620 11px 14px, transparent 14px 17px);
+  }
+  .tag-hole {
+    width: 14px; height: 14px; border-radius: 9999px;
+    background: #F4EFE6; border: 3px solid #B5533C;
+  }
+  input[type="range"] { accent-color: #B5533C; }
+  input[type="checkbox"].pack-check { accent-color: #B5533C; width: 1.1rem; height: 1.1rem; }
+  .qty-btn { user-select: none; }
+  .swatch { width: 2rem; height: 2rem; border-radius: 9999px; border: 2px solid rgba(0,0,0,.15); }
+  @media print {
+    .no-print { display: none !important; }
+    body { background: #fff; }
+    #print-sheet { display: block !important; }
+    .print-card { box-shadow: none !important; border: 1px solid #999 !important; }
+  }
+  #print-sheet { display: none; }
+</style>
+</head>
+<body id="top" class="text-ink antialiased">
+
+<!-- ============ STICKY HEADER ============ -->
+<header class="no-print sticky top-0 z-50 bg-paper/95 backdrop-blur border-b-2 border-dashed border-packred/40">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2.5">
+      <span class="relative inline-flex items-center justify-center w-9 h-9 rounded-md bg-packred text-paper font-display font-700 text-lg font-bold rotate-[-6deg]">P
+        <span class="tag-hole absolute -top-1.5 -right-1.5" style="width:10px;height:10px;border-width:2px"></span>
+      </span>
+      <span class="font-display font-bold text-2xl tracking-wide">Packly</span>
+    </a>
+    <nav class="flex items-center gap-5 text-sm font-mono uppercase tracking-widest">
+      <a href="#top" class="hover:text-packred">Home</a>
+      <a href="https://fixoraa.tech" class="text-packblue hover:text-packred">More Tools</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ============ TOP AD (verbatim) ============ -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pt-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <div class="origin-top scale-[0.44] sm:scale-100 shrink-0">
+        <script>
+          atOptions = { 'key' : '4e68ac77881c17fe128a46565d9a4e8c', 'format' : 'iframe', 'height' : 90, 'width' : 728, 'params' : {} };
+        </script>
+        <script src="https://www.highrevenueformat.com/4e68ac77881c17fe128a46565d9a4e8c/invoke.js"></script>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ BOARDING-PASS HERO ============ -->
+<main class="mx-auto max-w-6xl px-4 sm:px-6">
+  <section class="no-print mt-6 relative bg-white rounded-2xl shadow-[0_10px_40px_rgba(43,38,32,.12)] border border-packred/20 overflow-hidden">
+    <div class="grid md:grid-cols-[1fr_220px]">
+      <div class="p-6 sm:p-10">
+        <p class="font-mono text-xs uppercase tracking-[0.3em] text-packred mb-3">✈ Boarding pass · Seat: window</p>
+        <h1 class="font-display font-bold text-4xl sm:text-6xl leading-none tracking-tight">PACKLY</h1>
+        <p class="font-display text-xl sm:text-2xl text-packblue mt-1 tracking-wide">PACKING LIST GENERATOR</p>
+        <p class="mt-4 max-w-xl text-[15px] leading-relaxed text-ink/80">Build a smart what-to-pack checklist in seconds: capsule-wardrobe outfit math, a 3-1-1 liquids planner, forget-risk reminders, luggage weight vs. airline allowance, and a laundry-day recalculator — then print it and pack.</p>
+        <div class="mt-5 flex flex-wrap items-center gap-3">
+          <span class="inline-flex items-center gap-2 bg-packblue text-white text-xs font-mono uppercase tracking-[0.2em] px-4 py-2 rounded-full">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>
+            Unlimited Free Usage
+          </span>
+          <span class="stamp text-sm">No signup · No paywall</span>
+        </div>
+      </div>
+      <div class="relative hidden md:flex flex-col items-center justify-center gap-3 bg-packred/5 border-l-2 border-dashed border-packred/40 p-6">
+        <span class="notch" style="left:-13px"></span>
+        <div class="barcode h-16 w-40"></div>
+        <p class="font-mono text-[11px] tracking-[0.35em] text-ink/60">PKL · 001 · <span id="hero-date"></span></p>
+        <p class="font-mono text-[11px] tracking-[0.35em] text-packred">ADMIT ONE TRAVELER</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ THE TOOL : LUGGAGE-TAG STUBS ============ -->
+  <section class="no-print mt-8 bg-white rounded-2xl shadow-[0_10px_40px_rgba(43,38,32,.12)] border border-packred/20 overflow-hidden" aria-label="Packing list generator tool">
+
+    <!-- STUB A : trip setup -->
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packred text-white px-2.5 py-1 rounded tracking-widest">STUB A</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">Trip details</h2>
+      </div>
+      <p class="text-sm text-ink/60 mb-5 font-mono">Tell Packly about the journey — everything below recalculates instantly.</p>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Trip days</span>
+          <input id="in-days" type="number" min="1" max="365" value="7" inputmode="numeric"
+            class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 font-mono text-lg focus:border-packred focus:outline-none">
+        </label>
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Style</span>
+          <select id="in-style" class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 text-sm focus:border-packred focus:outline-none">
+            <option value="business">Business</option>
+            <option value="casual" selected>Casual / City break</option>
+            <option value="adventure">Adventure / Hiking</option>
+            <option value="beach">Beach / Resort</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Climate</span>
+          <select id="in-climate" class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 text-sm focus:border-packred focus:outline-none">
+            <option value="hot">Hot (25°C+)</option>
+            <option value="mild" selected>Mild (12–24°C)</option>
+            <option value="cold">Cold (below 12°C)</option>
+          </select>
+        </label>
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Travelers</span>
+          <input id="in-travelers" type="number" min="1" max="12" value="1" inputmode="numeric"
+            class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 font-mono text-lg focus:border-packred focus:outline-none">
+        </label>
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Laundry every (days)</span>
+          <input id="in-laundry" type="number" min="0" max="60" value="0" inputmode="numeric" title="0 = no laundry planned"
+            class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 font-mono text-lg focus:border-packred focus:outline-none">
+        </label>
+        <label class="block">
+          <span class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Allowance (kg)</span>
+          <input id="in-allowance" type="number" min="0" max="60" step="0.5" value="20" inputmode="decimal"
+            class="mt-1 w-full rounded-lg border-2 border-ink/15 bg-paper px-3 py-2.5 font-mono text-lg focus:border-packred focus:outline-none">
+        </label>
+      </div>
+      <div class="mt-4 flex flex-wrap gap-x-5 gap-y-2" id="flag-row">
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-beach" class="pack-check"> Beach days</label>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-business" class="pack-check"> Business meetings</label>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-laptop" class="pack-check"> Laptop</label>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-camera" class="pack-check"> Camera gear</label>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-adventure" class="pack-check"> Hiking</label>
+        <label class="inline-flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" id="f-baby" class="pack-check"> Traveling with baby</label>
+      </div>
+      <p id="trip-note" class="mt-3 text-sm text-packred font-mono hidden"></p>
+    </div>
+
+    <div class="perf-line mx-6 sm:mx-8"></div>
+
+    <!-- STUB B : capsule wardrobe -->
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packblue text-white px-2.5 py-1 rounded tracking-widest">STUB B</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">Capsule wardrobe planner</h2>
+      </div>
+      <p class="text-sm text-ink/60 mb-5 font-mono">Outfits = tops × bottoms × (layers + 1). Pack less, wear more.</p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="rounded-xl bg-paper p-5 border border-ink/10">
+          <div class="space-y-5">
+            <div>
+              <div class="flex justify-between font-mono text-sm mb-1"><span>Tops</span><span id="cap-tops-val" class="font-semibold text-packred">4</span></div>
+              <input id="cap-tops" type="range" min="1" max="8" value="4" class="w-full">
+            </div>
+            <div>
+              <div class="flex justify-between font-mono text-sm mb-1"><span>Bottoms</span><span id="cap-bottoms-val" class="font-semibold text-packred">3</span></div>
+              <input id="cap-bottoms" type="range" min="1" max="6" value="3" class="w-full">
+            </div>
+            <div>
+              <div class="flex justify-between font-mono text-sm mb-1"><span>Layers</span><span id="cap-layers-val" class="font-semibold text-packred">1</span></div>
+              <input id="cap-layers" type="range" min="0" max="4" value="1" class="w-full">
+            </div>
+          </div>
+          <button id="btn-capsule-suggest" class="mt-5 w-full rounded-lg bg-packred text-white font-mono uppercase tracking-widest text-sm py-2.5 hover:brightness-110 active:scale-[0.99]">Suggest for my trip</button>
+        </div>
+        <div class="rounded-xl border-2 border-dashed border-packred/50 p-5 relative">
+          <span class="stamp absolute -top-4 right-4 text-xs bg-white">Outfit math</span>
+          <p class="font-display font-bold text-5xl text-packred" id="cap-outfits">24</p>
+          <p class="font-mono text-xs uppercase tracking-widest text-ink/60 mt-1">mix-and-match outfits</p>
+          <p id="cap-detail" class="mt-3 text-sm text-ink/80"></p>
+          <div class="mt-4">
+            <p class="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-2">Suggested colour palette</p>
+            <div id="cap-palette" class="flex gap-2 flex-wrap"></div>
+          </div>
+          <p id="cap-note" class="mt-4 text-sm italic text-packblue"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="perf-line mx-6 sm:mx-8"></div>
+
+    <!-- STUB C : packing list -->
+    <div class="p-6 sm:p-8">
+      <div class="flex flex-wrap items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packred text-white px-2.5 py-1 rounded tracking-widest">STUB C</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">Your packing list</h2>
+        <span id="pack-progress-text" class="ml-auto font-mono text-xs text-ink/60">0 / 0 packed</span>
+      </div>
+      <div class="h-2.5 rounded-full bg-ink/10 overflow-hidden mb-5">
+        <div id="pack-progress-bar" class="h-full bg-packred rounded-full transition-all" style="width:0%"></div>
+      </div>
+      <div id="list-root" class="grid md:grid-cols-2 gap-5"></div>
+      <div class="mt-6 flex flex-wrap gap-3">
+        <button id="btn-print" class="rounded-lg bg-packblue text-white font-mono uppercase tracking-widest text-sm px-5 py-2.5 hover:brightness-110 active:scale-[0.99]">🖨 Print checklist</button>
+        <button id="btn-copy" class="rounded-lg border-2 border-packblue text-packblue font-mono uppercase tracking-widest text-sm px-5 py-2.5 hover:bg-packblue hover:text-white active:scale-[0.99]">⧉ Copy list</button>
+        <button id="btn-reset" class="rounded-lg border-2 border-ink/20 text-ink/70 font-mono uppercase tracking-widest text-sm px-5 py-2.5 hover:border-packred hover:text-packred active:scale-[0.99]">Reset ticks</button>
+        <span id="copy-note" class="self-center font-mono text-xs text-packblue hidden">Copied to clipboard ✓</span>
+      </div>
+    </div>
+
+    <div class="perf-line mx-6 sm:mx-8"></div>
+
+    <!-- STUB D : liquids -->
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packblue text-white px-2.5 py-1 rounded tracking-widest">STUB D</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">3-1-1 liquids planner</h2>
+      </div>
+      <p class="text-sm text-ink/60 mb-5 font-mono">Each container ≤ 100 ml · all in ONE quart-size (≈1 L) bag · one bag per passenger.</p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <div id="liquid-rows" class="space-y-2"></div>
+          <div class="mt-4 flex gap-2">
+            <input id="liq-name" type="text" placeholder="e.g. Face serum" maxlength="40"
+              class="flex-1 rounded-lg border-2 border-ink/15 bg-paper px-3 py-2 text-sm focus:border-packred focus:outline-none">
+            <input id="liq-ml" type="number" min="1" max="1000" placeholder="ml" inputmode="numeric"
+              class="w-20 rounded-lg border-2 border-ink/15 bg-paper px-3 py-2 text-sm font-mono focus:border-packred focus:outline-none">
+            <button id="btn-liq-add" class="rounded-lg bg-packred text-white font-mono text-sm px-4 hover:brightness-110 active:scale-[0.99]">+ Add</button>
+          </div>
+          <p id="liq-note" class="mt-2 text-sm text-packred font-mono hidden"></p>
+        </div>
+        <div class="rounded-xl bg-paper p-5 border border-ink/10">
+          <div class="flex justify-between font-mono text-sm mb-2"><span>Quart-bag fill</span><span><span id="liq-total" class="font-semibold text-packred">0</span> / 1000 ml</span></div>
+          <div class="h-4 rounded-full bg-ink/10 overflow-hidden">
+            <div id="liq-gauge-fill" class="h-full bg-packblue rounded-full transition-all" style="width:0%"></div>
+          </div>
+          <div id="liq-issues" class="mt-4 space-y-2"></div>
+          <div id="liq-warnings" class="mt-2 space-y-2"></div>
+          <p id="liq-ok" class="mt-4 font-mono text-sm text-[#2F7D4F]">✓ 3-1-1 compliant — safe for cabin baggage.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="perf-line mx-6 sm:mx-8"></div>
+
+    <!-- STUB E : forget-risk + weight -->
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packred text-white px-2.5 py-1 rounded tracking-widest">STUB E</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">Forget-risk & weigh-in</h2>
+      </div>
+      <p class="text-sm text-ink/60 mb-5 font-mono">The items travelers leave behind most — plus your bag on the scale.</p>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="rounded-xl border-2 border-dashed border-packred/50 p-5">
+          <p class="font-mono text-[11px] uppercase tracking-widest text-ink/60 mb-3">Most-forgotten items — tick as packed</p>
+          <div id="forget-root" class="space-y-2"></div>
+        </div>
+        <div class="rounded-xl bg-paper p-5 border border-ink/10 text-center">
+          <p class="font-mono text-[11px] uppercase tracking-widest text-ink/60">Estimated bag weight</p>
+          <p class="font-display font-bold text-5xl mt-1"><span id="weight-total">0</span><span class="text-2xl text-ink/50"> kg</span></p>
+          <p class="font-mono text-xs text-ink/60 mt-1">for <span id="weight-travelers">1</span> traveler(s) · allowance <span id="weight-allowance-echo">20</span> kg</p>
+          <div class="mt-5"><span id="weight-stamp" class="stamp green text-base">CLEARED</span></div>
+          <p id="weight-msg" class="mt-4 text-sm text-ink/80"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="perf-line mx-6 sm:mx-8"></div>
+
+    <!-- STUB F : laundry -->
+    <div class="p-6 sm:p-8">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="font-mono text-xs bg-packblue text-white px-2.5 py-1 rounded tracking-widest">STUB F</span>
+        <h2 class="font-display font-semibold text-2xl tracking-wide">Laundry-day recalculator</h2>
+      </div>
+      <p class="text-sm text-ink/60 mb-5 font-mono">Planning laundry mid-trip? Watch the clothing list shrink.</p>
+      <div id="laundry-result" class="rounded-xl bg-paper border border-ink/10 p-5"></div>
+    </div>
+  </section>
+
+  <!-- ============ PRINT SHEET (print only) ============ -->
+  <div id="print-sheet" aria-hidden="true">
+    <h1 style="font-family:Oswald,sans-serif">PACKLY — Packing Checklist</h1>
+    <p id="print-meta" style="font-family:monospace;font-size:12px"></p>
+    <div id="print-lists"></div>
+    <h2 style="font-family:Oswald,sans-serif;margin-top:16px">Most-forgotten — double check</h2>
+    <div id="print-forget"></div>
+    <p id="print-weight" style="font-family:monospace;font-size:12px;margin-top:12px"></p>
+  </div>
+</main>
+
+<!-- ============ CORE LOGIC (inlined at build time) ============ -->
+<script id="packly-packing-list-lib">
+/* ============================================================
+   Packly — packing list generator core logic (pure functions)
+   Pure logic only — no browser globals of any kind.
+   Top-level function declarations only. No closing script tag
+   sequence anywhere in this file.
+   ============================================================ */
+
+function round1(n) {
+  var x = Number(n);
+  if (!isFinite(x)) return 0;
+  return Math.round(x * 10) / 10;
+}
+
+function clampInt(n, lo, hi, fallback) {
+  var x = Math.floor(Number(n));
+  if (!isFinite(x)) x = fallback;
+  if (x < lo) x = lo;
+  if (x > hi) x = hi;
+  return x;
+}
+
+function validDays(d) { return clampInt(d, 1, 365, 7); }
+function validTravelers(t) { return clampInt(t, 1, 12, 1); }
+function validLaundryDays(l) {
+  var x = Math.floor(Number(l));
+  if (!isFinite(x) || x < 0) return 0;
+  return Math.min(60, x);
+}
+
+/* ---------------- styles & climates ---------------- */
+
+function styleList() {
+  return [
+    { id: 'business', name: 'Business', layers: 2,
+      palette: ['White', 'Navy', 'Charcoal', 'Sky blue', 'Black'],
+      tip: 'Stick to two neutrals plus one accent colour so every top matches every bottom.' },
+    { id: 'casual', name: 'Casual / City break', layers: 1,
+      palette: ['White', 'Olive', 'Denim blue', 'Grey', 'Tan'],
+      tip: 'One versatile jacket or overshirt elevates every casual combination.' },
+    { id: 'adventure', name: 'Adventure / Hiking', layers: 2,
+      palette: ['Khaki', 'Olive', 'Navy', 'Grey', 'Black'],
+      tip: 'Merino or quick-dry fabrics can be worn 2–3 times between washes.' },
+    { id: 'beach', name: 'Beach / Resort', layers: 1,
+      palette: ['White', 'Coral', 'Turquoise', 'Sand', 'Navy'],
+      tip: 'Two swimsuits rotate while one dries — almost everything else is optional.' }
+  ];
+}
+
+function styleById(id) {
+  var list = styleList();
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+  return list[1];
+}
+
+function climateList() {
+  return [
+    { id: 'hot', name: 'Hot (25°C and up)', note: 'Light fabrics, sun protection' },
+    { id: 'mild', name: 'Mild (12–24°C)', note: 'Layers for changeable days' },
+    { id: 'cold', name: 'Cold (below 12°C)', note: 'Insulation and wind protection' }
+  ];
+}
+
+function climateById(id) {
+  var list = climateList();
+  for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+  return list[1];
+}
+
+/* ---------------- capsule wardrobe outfit math ----------------
+   Outfits = tops × bottoms × (layers + 1). A layer is optional,
+   so it multiplies combinations instead of adding to them. */
+
+function capsuleOutfits(tops, bottoms, layers) {
+  var t = clampInt(tops, 0, 50, 0);
+  var b = clampInt(bottoms, 0, 50, 0);
+  var l = clampInt(layers, 0, 20, 0);
+  return t * b * (l + 1);
+}
+
+function capsuleSuggest(days, styleId) {
+  days = validDays(days);
+  var style = styleById(styleId);
+  var bottoms = Math.min(4, Math.max(2, Math.ceil(days / 5)));
+  var tops = Math.min(6, Math.max(3, Math.ceil(days / 2)));
+  var layers = style.layers;
+  var guard = 0;
+  while (capsuleOutfits(tops, bottoms, layers) < Math.ceil(days * 1.25) && guard < 30) {
+    guard++;
+    if (tops < 7) tops++;
+    else if (bottoms < 5) bottoms++;
+    else break;
+  }
+  var outfits = capsuleOutfits(tops, bottoms, layers);
+  var pieces = tops + bottoms + layers;
+  var covered = outfits >= Math.ceil(days * 1.25);
+  return {
+    tops: tops,
+    bottoms: bottoms,
+    layers: layers,
+    outfits: outfits,
+    pieces: pieces,
+    outfitsPerPiece: round1(outfits / pieces),
+    palette: style.palette,
+    tip: style.tip,
+    covered: covered,
+    note: covered
+      ? outfits + ' mix-and-match outfits from ' + pieces + ' pieces — comfortably more than ' + days + ' days of unique looks.'
+      : 'For a trip this long, pack this capsule and plan laundry every 7 days instead of packing more.'
+  };
+}
+
+/* ---------------- clothing quantities with laundry ----------------
+   qty = ceil(wear-window × rate), wear-window = laundry cycle
+   when laundry is planned, otherwise the whole trip. Capped at 8
+   because beyond that laundry is always the saner option. */
+
+function clothingQty(days, rate, laundryDays) {
+  days = validDays(days);
+  var r = Number(rate);
+  if (!isFinite(r) || r < 0) r = 0;
+  laundryDays = validLaundryDays(laundryDays);
+  var cycle = laundryDays > 0 ? Math.min(days, laundryDays) : days;
+  var q = Math.ceil(cycle * r);
+  if (r > 0 && q < 1) q = 1;
+  return Math.min(8, q);
+}
+
+function laundryAdjust(items, laundryEveryDays, tripDays) {
+  tripDays = validDays(tripDays);
+  laundryEveryDays = validLaundryDays(laundryEveryDays);
+  return items.map(function (it) {
+    var c = {};
+    for (var k in it) c[k] = it[k];
+    c.saved = 0;
+    c.laundryShrunk = false;
+    if (it.adjustable && typeof it.rate === 'number' && it.rate > 0 &&
+        laundryEveryDays > 0 && laundryEveryDays < tripDays) {
+      var nq = clothingQty(tripDays, it.rate, laundryEveryDays);
+      if (nq < it.qty) {
+        c.saved = it.qty - nq;
+        c.qty = nq;
+        c.laundryShrunk = true;
+      }
+    }
+    return c;
+  });
+}
+
+function laundrySummary(before, after) {
+  var itemsRemoved = 0;
+  var weightSavedG = 0;
+  var shrunk = [];
+  for (var i = 0; i < before.length; i++) {
+    var a = after[i];
+    if (a && a.saved > 0) {
+      itemsRemoved += a.saved;
+      weightSavedG += a.saved * (a.weightG || 0);
+      shrunk.push({ name: a.name, from: before[i].qty, to: a.qty });
+    }
+  }
+  return {
+    itemsRemoved: itemsRemoved,
+    weightSavedKg: round1(weightSavedG / 1000),
+    shrunk: shrunk
+  };
+}
+
+/* ---------------- packing list builder ---------------- */
+
+function addItem(arr, name, qty, weightG, opts) {
+  opts = opts || {};
+  arr.push({
+    name: name,
+    qty: Math.max(1, Math.floor(Number(qty) || 1)),
+    weightG: Math.max(0, Math.round(Number(weightG) || 0)),
+    essential: !!opts.essential,
+    rate: typeof opts.rate === 'number' ? opts.rate : 0,
+    adjustable: !!opts.adjustable,
+    liquid: !!opts.liquid,
+    volumeMl: opts.liquid ? Math.max(0, Math.round(Number(opts.volumeMl) || 0)) : 0,
+    note: opts.note || ''
+  });
+}
+
+function packingList(trip) {
+  trip = trip || {};
+  var days = validDays(trip.days);
+  var style = styleById(trip.styleId);
+  var climate = climateById(trip.climateId);
+  var laundryDays = validLaundryDays(trip.laundryDays);
+  var flags = trip.flags || {};
+  var cats = [];
+
+  /* ---- documents & money ---- */
+  var docs = [];
+  addItem(docs, 'Passport / national ID', 1, 80, { essential: true, note: 'Check expiry 6+ months out' });
+  addItem(docs, 'Flight / train tickets (offline copy)', 1, 20, { essential: true });
+  addItem(docs, 'Travel insurance documents', 1, 20);
+  addItem(docs, 'Hotel / stay confirmations', 1, 20);
+  addItem(docs, 'Credit & debit cards + some cash', 1, 40, { essential: true });
+  addItem(docs, 'Emergency contacts list', 1, 10);
+  addItem(docs, 'Visa / entry permits (if required)', 1, 20);
+  cats.push({ id: 'documents', category: 'Documents & Money', icon: '🪪', items: docs });
+
+  /* ---- clothing ---- */
+  var cloth = [];
+  function cq(rate) { return clothingQty(days, rate, laundryDays); }
+  addItem(cloth, 'Underwear', cq(1.0), 60, { essential: true, rate: 1.0, adjustable: true });
+  addItem(cloth, 'Socks', cq(1.0), 45, { essential: true, rate: 1.0, adjustable: true });
+  addItem(cloth, 'Tops / t-shirts', cq(0.8), 180, { essential: true, rate: 0.8, adjustable: true });
+  addItem(cloth, 'Bottoms (trousers / jeans / skirts)', cq(0.45), 450, { essential: true, rate: 0.45, adjustable: true });
+  addItem(cloth, 'Sleepwear', cq(0.25), 250, { rate: 0.25, adjustable: true });
+  if (climate.id === 'cold') {
+    addItem(cloth, 'Heavy winter jacket', 1, 950, { essential: true });
+    addItem(cloth, 'Sweaters / hoodies', cq(0.4), 480, { essential: true, rate: 0.4, adjustable: true });
+    addItem(cloth, 'Thermal base layers', cq(0.5), 200, { rate: 0.5, adjustable: true });
+    addItem(cloth, 'Gloves + scarf + beanie set', 1, 320, { essential: true });
+    addItem(cloth, 'Warm boots', 1, 1100);
+  } else {
+    addItem(cloth, 'Light layer (cardigan / fleece)', climate.id === 'mild' ? 2 : 1, 400, { rate: 0.2, adjustable: true });
+  }
+  if (climate.id === 'hot' || flags.beach) {
+    addItem(cloth, 'Shorts', cq(0.4), 280, { rate: 0.4, adjustable: true });
+    addItem(cloth, 'Sun hat / cap', 1, 90);
+    addItem(cloth, 'Sunglasses', 1, 40);
+    addItem(cloth, 'Sandals / flip-flops', 1, 320);
+  }
+  if (flags.beach || style.id === 'beach') {
+    addItem(cloth, 'Swimsuit', 2, 150, { essential: true });
+    addItem(cloth, 'Beach towel (quick-dry)', 1, 300);
+    addItem(cloth, 'Waterproof phone pouch', 1, 60);
+  }
+  if (flags.business || style.id === 'business') {
+    addItem(cloth, 'Blazer', 1, 700, { essential: true });
+    addItem(cloth, 'Dress shirts / blouses', cq(0.7), 250, { essential: true, rate: 0.7, adjustable: true });
+    addItem(cloth, 'Dress shoes', 1, 820, { essential: true });
+    addItem(cloth, 'Belt', 1, 120);
+  }
+  addItem(cloth, 'Comfortable walking shoes (worn)', 1, 850, { essential: true });
+  if (flags.adventure) {
+    addItem(cloth, 'Hiking boots', 1, 1150, { essential: true });
+    addItem(cloth, 'Quick-dry hiking socks', cq(0.5), 60, { rate: 0.5, adjustable: true });
+  }
+  if (flags.baby) {
+    addItem(cloth, 'Baby outfits (per day)', cq(1.2), 90, { essential: true, rate: 1.2, adjustable: true, note: 'Babies go through clothes fast' });
+  }
+  cats.push({ id: 'clothing', category: 'Clothing', icon: '👕', items: cloth });
+
+  /* ---- toiletries (liquids flagged with ml) ---- */
+  var toi = [];
+  addItem(toi, 'Toothbrush', 1, 25, { essential: true });
+  addItem(toi, 'Toothpaste (75 ml)', 1, 95, { liquid: true, volumeMl: 75 });
+  addItem(toi, 'Shampoo (travel bottle, 100 ml)', 1, 120, { liquid: true, volumeMl: 100 });
+  addItem(toi, 'Conditioner (100 ml)', 1, 120, { liquid: true, volumeMl: 100 });
+  addItem(toi, 'Body wash (100 ml)', 1, 120, { liquid: true, volumeMl: 100 });
+  addItem(toi, 'Deodorant', 1, 90);
+  addItem(toi, 'Razor + spare blades', 1, 60);
+  addItem(toi, 'Moisturizer (50 ml)', 1, 70, { liquid: true, volumeMl: 50 });
+  addItem(toi, 'Lip balm', 1, 15);
+  addItem(toi, 'Hairbrush / comb', 1, 80);
+  addItem(toi, 'Nail clippers', 1, 30);
+  if (climate.id === 'hot' || flags.beach || flags.adventure) {
+    addItem(toi, 'Sunscreen SPF 50 (100 ml)', 1, 130, { essential: true, liquid: true, volumeMl: 100 });
+  }
+  cats.push({ id: 'toiletries', category: 'Toiletries', icon: '🧴', items: toi });
+
+  /* ---- electronics ---- */
+  var ele = [];
+  addItem(ele, 'Phone + charger', 1, 300, { essential: true });
+  addItem(ele, 'Universal travel adapter', 1, 160, { essential: true });
+  addItem(ele, 'Power bank', 1, 260);
+  addItem(ele, 'Earbuds / headphones', 1, 220);
+  if (flags.laptop) addItem(ele, 'Laptop + charger', 1, 1600);
+  if (flags.camera) addItem(ele, 'Camera + lens', 1, 900);
+  addItem(ele, 'E-reader / book', 1, 200);
+  cats.push({ id: 'electronics', category: 'Electronics', icon: '🔌', items: ele });
+
+  /* ---- health & meds ---- */
+  var hea = [];
+  addItem(hea, 'Prescription medications', 1, 100, { essential: true, note: 'Pack in hand luggage' });
+  addItem(hea, 'Painkillers / antihistamines', 1, 80);
+  addItem(hea, 'Plasters / band-aids', 1, 30);
+  addItem(hea, 'Hand sanitizer (60 ml)', 1, 80, { liquid: true, volumeMl: 60 });
+  addItem(hea, 'Tissues pack', 1, 40);
+  addItem(hea, 'Rehydration salts', 1, 30);
+  if (climate.id === 'hot' || flags.adventure) {
+    addItem(hea, 'Insect repellent (100 ml)', 1, 130, { liquid: true, volumeMl: 100 });
+  }
+  if (flags.baby) {
+    addItem(hea, 'Diapers', Math.min(48, days * 6), 45, { essential: true, note: '≈6 per day' });
+    addItem(hea, 'Baby wipes pack', 1, 220, { essential: true });
+    addItem(hea, 'Baby formula / food pouches', 1, 500, { essential: true });
+  }
+  cats.push({ id: 'health', category: 'Health & Meds', icon: '💊', items: hea });
+
+  /* ---- extras ---- */
+  var ext = [];
+  addItem(ext, 'Daypack / foldable tote', 1, 350);
+  addItem(ext, 'Packing cubes set', 1, 200);
+  addItem(ext, 'Travel lock', 1, 90);
+  addItem(ext, 'Reusable water bottle (empty)', 1, 180);
+  addItem(ext, 'Travel pillow', 1, 280);
+  addItem(ext, 'Eye mask + earplugs', 1, 60);
+  addItem(ext, 'Umbrella / rain shell', 1, 350);
+  addItem(ext, 'Laundry bag', 1, 50);
+  addItem(ext, 'Snacks for transit', 1, 300);
+  addItem(ext, 'Ziplock bags', 3, 10);
+  if (flags.adventure) {
+    addItem(ext, 'Headlamp / torch', 1, 120);
+    addItem(ext, 'Trekking towel', 1, 180);
+  }
+  cats.push({ id: 'extras', category: 'Extras & Comfort', icon: '🎒', items: ext });
+
+  return cats;
+}
+
+function flattenItems(cats) {
+  var out = [];
+  (cats || []).forEach(function (c) {
+    (c.items || []).forEach(function (it) {
+      var c2 = {};
+      for (var k in it) c2[k] = it[k];
+      c2.category = c.category;
+      out.push(c2);
+    });
+  });
+  return out;
+}
+
+/* ---------------- 3-1-1 liquids planner ----------------
+   Rule: each container ≤ 100 ml (3.4 oz), all containers must fit
+   in ONE quart-size (≈1 litre) zip bag, one bag per passenger. */
+
+function liquidsCheck(items) {
+  var total = 0;
+  var issues = [];
+  var warnings = [];
+  var list = items || [];
+  list.forEach(function (it) {
+    var ml = Math.max(0, Math.round(Number(it.volumeMl) || 0));
+    total += ml;
+    if (ml > 100) {
+      issues.push((it.name || 'Item') + ' is ' + ml + ' ml — over the 100 ml per-container limit. Decant it into a travel-size bottle.');
+    }
+  });
+  if (total > 1000) {
+    issues.push('Total ' + total + ' ml exceeds one quart-size (1 litre) bag. Move some items to checked luggage or leave them behind.');
+  }
+  if (list.length > 12 && issues.length === 0) {
+    warnings.push(list.length + ' containers is a tight squeeze for one quart bag — consolidate where you can.');
+  }
+  return {
+    totalMl: total,
+    count: list.length,
+    ok: issues.length === 0,
+    issues: issues,
+    warnings: warnings
+  };
+}
+
+/* ---------------- weight estimator vs allowance ---------------- */
+
+function weightEstimate(items, travelers) {
+  travelers = validTravelers(travelers);
+  var g = 0;
+  (items || []).forEach(function (it) {
+    g += (it.weightG || 0) * (it.qty || 1);
+  });
+  return round1(g * travelers / 1000);
+}
+
+function weightVerdict(totalKg, allowanceKg) {
+  totalKg = round1(totalKg);
+  var a = Number(allowanceKg);
+  if (!isFinite(a) || a <= 0) {
+    return { set: false, over: false, diffKg: 0, pct: 0, message: 'Enter your airline allowance to get a verdict.' };
+  }
+  var over = totalKg > a;
+  var diff = round1(Math.abs(totalKg - a));
+  var pct = Math.round(totalKg / a * 100);
+  return {
+    set: true,
+    over: over,
+    diffKg: diff,
+    pct: pct,
+    message: over
+      ? 'OVER by ' + diff + ' kg — remove items or shift some to a personal item.'
+      : 'OK — ' + diff + ' kg under your ' + a + ' kg allowance (' + pct + '% used).'
+  };
+}
+
+/* ---------------- most-forgotten items ---------------- */
+
+function forgottenItems() {
+  return [
+    { name: 'Phone charger', risk: 'high', tip: 'Keep a spare cable permanently in your daypack.' },
+    { name: 'Universal travel adapter', risk: 'high', tip: 'Buy it before the airport — airport prices are brutal.' },
+    { name: 'Prescription medication', risk: 'high', tip: 'Pack in hand luggage, never in checked bags.' },
+    { name: 'Passport / ID', risk: 'high', tip: 'Photograph it too, and store the photo in the cloud.' },
+    { name: 'Contact lenses / spare glasses', risk: 'high', tip: 'A broken pair abroad ruins the trip.' },
+    { name: 'Headphones / earbuds', risk: 'medium', tip: 'Long flights without them feel twice as long.' },
+    { name: 'Sunglasses', risk: 'medium', tip: 'Easy to leave on a hotel nightstand.' },
+    { name: 'Toothbrush', risk: 'medium', tip: 'The classic — pack it last, check it first.' },
+    { name: 'Deodorant', risk: 'medium', tip: 'Solid sticks skip the liquids rule entirely.' },
+    { name: 'Swimsuit', risk: 'medium', tip: 'Forgotten most on winter-sun trips.' },
+    { name: 'Travel insurance documents', risk: 'medium', tip: 'Save the policy PDF offline on your phone.' },
+    { name: 'Reusable water bottle', risk: 'low', tip: 'Empty it before security, refill after.' }
+  ];
+}
+
+/* ---------------- full trip plan (convenience) ---------------- */
+
+function planTrip(opts) {
+  opts = opts || {};
+  var days = validDays(opts.days);
+  var travelers = validTravelers(opts.travelers);
+  var laundryDays = validLaundryDays(opts.laundryDays);
+
+  var baseTrip = {};
+  for (var k in opts) baseTrip[k] = opts[k];
+  baseTrip.days = days;
+  baseTrip.travelers = travelers;
+  baseTrip.laundryDays = 0;
+  var baseCats = packingList(baseTrip);
+  var before = flattenItems(baseCats);
+
+  // Laundry shrinking goes through laundryAdjust so quantities carry
+  // the saved/laundryShrunk bookkeeping used by the summary.
+  var adjusted = laundryAdjust(before, laundryDays, days);
+  var ai = 0;
+  var finalCats = baseCats.map(function (c) {
+    return {
+      id: c.id, category: c.category, icon: c.icon,
+      items: c.items.map(function () { var a = adjusted[ai++]; return a; })
+    };
+  });
+  var after = adjusted;
+
+  var liquidItems = after.filter(function (it) { return it.liquid; })
+    .map(function (it) { return { name: it.name, volumeMl: it.volumeMl }; });
+
+  return {
+    days: days,
+    travelers: travelers,
+    laundryDays: laundryDays,
+    style: styleById(opts.styleId),
+    climate: climateById(opts.climateId),
+    categories: finalCats,
+    itemCount: after.length,
+    totalUnits: after.reduce(function (s, it) { return s + (it.qty || 1); }, 0),
+    weightKg: weightEstimate(after, travelers),
+    verdict: weightVerdict(weightEstimate(after, travelers), opts.allowanceKg),
+    liquids: liquidsCheck(liquidItems),
+    capsule: capsuleSuggest(days, opts.styleId),
+    laundry: laundrySummary(before, after)
+  };
+}
+
+/* ---------------- printable / copyable text ---------------- */
+
+function checklistText(cats, meta) {
+  meta = meta || {};
+  var lines = [];
+  lines.push('PACKLY PACKING LIST' + (meta.title ? ' — ' + meta.title : ''));
+  lines.push('Generated with Packly · free packing list generator');
+  lines.push('');
+  (cats || []).forEach(function (c) {
+    lines.push('[' + c.category.toUpperCase() + ']');
+    (c.items || []).forEach(function (it) {
+      lines.push('[ ] ' + it.name + (it.qty > 1 ? ' ×' + it.qty : ''));
+    });
+    lines.push('');
+  });
+  lines.push('Tip: tick items off as they go into the bag.');
+  return lines.join('\n');
+}
+
+</script>
+
+<script>
+(function () {
+  'use strict';
+  var LS_KEY = 'packly-v1';
+
+  function $(id) { return document.getElementById(id); }
+
+  var state = {
+    checked: {},        // item name -> true
+    qty: {},            // item name -> overridden qty
+    forgetChecked: {},  // forgotten item name -> true
+    customLiquids: [],  // [{name, volumeMl}]
+    liqMl: {},          // liquid name -> overridden ml
+    capsuleTouched: false
+  };
+
+  function loadState() {
+    try {
+      var raw = localStorage.getItem(LS_KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (s && typeof s === 'object') {
+        ['checked', 'qty', 'forgetChecked', 'liqMl'].forEach(function (k) {
+          if (s[k] && typeof s[k] === 'object') state[k] = s[k];
+        });
+        if (Array.isArray(s.customLiquids)) state.customLiquids = s.customLiquids;
+        if (s.inputs) {
+          Object.keys(s.inputs).forEach(function (k) {
+            var el = $('in-' + k) || $('f-' + k);
+            if (!el) return;
+            if (el.type === 'checkbox') el.checked = !!s.inputs[k];
+            else el.value = s.inputs[k];
+          });
+        }
+      }
+    } catch (e) { /* fresh start */ }
+  }
+
+  function saveState() {
+    try {
+      var inputs = {};
+      ['days', 'style', 'climate', 'travelers', 'laundry', 'allowance'].forEach(function (k) {
+        var el = $('in-' + k); if (el) inputs[k] = el.value;
+      });
+      ['beach', 'business', 'laptop', 'camera', 'adventure', 'baby'].forEach(function (k) {
+        var el = $('f-' + k); if (el) inputs[k] = el.checked;
+      });
+      localStorage.setItem(LS_KEY, JSON.stringify({
+        checked: state.checked, qty: state.qty, forgetChecked: state.forgetChecked,
+        customLiquids: state.customLiquids, liqMl: state.liqMl, inputs: inputs
+      }));
+    } catch (e) { /* private mode */ }
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function readOpts() {
+    return {
+      days: $('in-days').value,
+      styleId: $('in-style').value,
+      climateId: $('in-climate').value,
+      travelers: $('in-travelers').value,
+      laundryDays: $('in-laundry').value,
+      allowanceKg: $('in-allowance').value,
+      flags: {
+        beach: $('f-beach').checked, business: $('f-business').checked,
+        laptop: $('f-laptop').checked, camera: $('f-camera').checked,
+        adventure: $('f-adventure').checked, baby: $('f-baby').checked
+      }
+    };
+  }
+
+  function effectiveCats(plan) {
+    // apply qty overrides
+    return plan.categories.map(function (c) {
+      return {
+        id: c.id, category: c.category, icon: c.icon,
+        items: c.items.map(function (it) {
+          var c2 = {};
+          for (var k in it) c2[k] = it[k];
+          if (state.qty[it.name]) c2.qty = state.qty[it.name];
+          return c2;
+        })
+      };
+    });
+  }
+
+  function liquidsCombined(plan) {
+    var map = {};
+    plan.categories.forEach(function (c) {
+      c.items.forEach(function (it) {
+        if (it.liquid) map[it.name] = (state.liqMl[it.name] != null ? state.liqMl[it.name] : it.volumeMl);
+      });
+    });
+    state.customLiquids.forEach(function (l) { map[l.name] = l.volumeMl; });
+    return Object.keys(map).map(function (n) { return { name: n, volumeMl: map[n] }; });
+  }
+
+  function renderCapsule() {
+    var t = +$('cap-tops').value, b = +$('cap-bottoms').value, l = +$('cap-layers').value;
+    $('cap-tops-val').textContent = t;
+    $('cap-bottoms-val').textContent = b;
+    $('cap-layers-val').textContent = l;
+    var outfits = capsuleOutfits(t, b, l);
+    $('cap-outfits').textContent = outfits;
+    $('cap-detail').textContent = t + ' tops × ' + b + ' bottoms × ' + (l + 1) + ' layer option' + (l === 1 ? '' : 's') +
+      ' = ' + outfits + ' unique outfits from ' + (t + b + l) + ' pieces.';
+  }
+
+  function renderSuggest(plan) {
+    var s = plan.capsule;
+    var swatchColors = {
+      'white': '#f8f8f8', 'navy': '#22344f', 'charcoal': '#3d3d3d', 'sky blue': '#8ecae6',
+      'black': '#141414', 'olive': '#6b7f3e', 'denim blue': '#3b5a80', 'grey': '#9a9a9a',
+      'tan': '#d2b48c', 'khaki': '#c3b091', 'coral': '#ff7f6e', 'turquoise': '#40d9c9', 'sand': '#e6d3a3'
+    };
+    $('cap-palette').innerHTML = s.palette.map(function (c) {
+      var bg = swatchColors[c.toLowerCase()] || '#cccccc';
+      return '<span class="flex items-center gap-1.5 font-mono text-xs bg-white border border-ink/15 rounded-full pl-1 pr-3 py-1">' +
+        '<span class="swatch" style="background:' + bg + '" title="' + esc(c) + '"></span>' + esc(c) + '</span>';
+    }).join('');
+    $('cap-note').textContent = '💡 ' + s.tip + ' ' + s.note;
+  }
+
+  function renderList(plan) {
+    var cats = effectiveCats(plan);
+    var total = 0, done = 0;
+    $('list-root').innerHTML = cats.map(function (c) {
+      var rows = c.items.map(function (it) {
+        total++;
+        var isChecked = !!state.checked[it.name];
+        if (isChecked) done++;
+        var shrunk = it.laundryShrunk ? ' <span class="font-mono text-[10px] uppercase tracking-widest bg-packblue/10 text-packblue px-1.5 py-0.5 rounded">laundry −' + it.saved + '</span>' : '';
+        return '<li class="flex items-center gap-2.5 py-1.5 border-b border-dashed border-ink/10 last:border-0">' +
+          '<input type="checkbox" class="pack-check shrink-0" data-item="' + esc(it.name) + '"' + (isChecked ? ' checked' : '') + '>' +
+          '<span class="flex-1 text-sm' + (isChecked ? ' line-through text-ink/40' : '') + '">' +
+          (it.essential ? '<span class="text-packred" title="Essential">★ </span>' : '') + esc(it.name) + shrunk +
+          (it.note ? '<span class="block text-[11px] text-ink/50 font-mono">' + esc(it.note) + '</span>' : '') + '</span>' +
+          '<span class="flex items-center gap-1 font-mono text-xs">' +
+          '<button class="qty-btn w-6 h-6 rounded border border-ink/20 hover:border-packred hover:text-packred" data-q="-1" data-item="' + esc(it.name) + '">−</button>' +
+          '<span class="w-8 text-center">×' + it.qty + '</span>' +
+          '<button class="qty-btn w-6 h-6 rounded border border-ink/20 hover:border-packred hover:text-packred" data-q="1" data-item="' + esc(it.name) + '">+</button>' +
+          '</span>' +
+          '<span class="font-mono text-[11px] text-ink/50 w-16 text-right">' + (it.weightG * it.qty >= 1000 ? round1(it.weightG * it.qty / 1000) + ' kg' : (it.weightG * it.qty) + ' g') + '</span>' +
+          '</li>';
+      }).join('');
+      return '<div class="rounded-xl border border-ink/10 bg-paper/60 p-4">' +
+        '<h3 class="font-display font-semibold text-lg mb-1"><span class="mr-2">' + c.icon + '</span>' + esc(c.category) + '</h3>' +
+        '<ul>' + rows + '</ul></div>';
+    }).join('');
+    $('pack-progress-text').textContent = done + ' / ' + total + ' packed';
+    $('pack-progress-bar').style.width = total ? Math.round(done / total * 100) + '%' : '0%';
+  }
+
+  function renderLiquids(plan) {
+    var items = liquidsCombined(plan);
+    $('liquid-rows').innerHTML = items.map(function (it) {
+      var isCustom = state.customLiquids.some(function (l) { return l.name === it.name; });
+      return '<div class="flex items-center gap-2 rounded-lg border border-ink/10 bg-paper/60 px-3 py-2">' +
+        '<span class="flex-1 text-sm">🧴 ' + esc(it.name) + '</span>' +
+        '<input type="number" min="1" max="1000" value="' + it.volumeMl + '" data-liq="' + esc(it.name) + '" inputmode="numeric" ' +
+        'class="w-20 rounded border border-ink/15 px-2 py-1 text-sm font-mono text-right focus:border-packred focus:outline-none"> <span class="font-mono text-xs text-ink/50">ml</span>' +
+        (isCustom ? '<button class="text-packred font-mono text-sm hover:font-bold" data-liq-del="' + esc(it.name) + '" title="Remove">✕</button>' : '') +
+        '</div>';
+    }).join('') || '<p class="text-sm text-ink/50 font-mono">No liquids — add your first below.</p>';
+
+    var check = liquidsCheck(items);
+    $('liq-total').textContent = check.totalMl;
+    var pct = Math.min(100, Math.round(check.totalMl / 1000 * 100));
+    var fill = $('liq-gauge-fill');
+    fill.style.width = pct + '%';
+    fill.className = 'h-full rounded-full transition-all ' + (check.ok ? 'bg-packblue' : 'bg-packred');
+    $('liq-issues').innerHTML = check.issues.map(function (m) {
+      return '<p class="text-sm text-packred font-mono bg-packred/10 border border-packred/30 rounded-lg px-3 py-2">⚠ ' + esc(m) + '</p>';
+    }).join('');
+    $('liq-warnings').innerHTML = check.warnings.map(function (m) {
+      return '<p class="text-sm text-packblue font-mono bg-packblue/10 border border-packblue/30 rounded-lg px-3 py-2">ℹ ' + esc(m) + '</p>';
+    }).join('');
+    $('liq-ok').style.display = check.ok ? 'block' : 'none';
+  }
+
+  function renderForget() {
+    var items = forgottenItems();
+    $('forget-root').innerHTML = items.map(function (it) {
+      var checked = !!state.forgetChecked[it.name];
+      var badge = it.risk === 'high'
+        ? '<span class="font-mono text-[10px] uppercase tracking-widest bg-packred text-white px-1.5 py-0.5 rounded">high risk</span>'
+        : it.risk === 'medium'
+          ? '<span class="font-mono text-[10px] uppercase tracking-widest bg-packblue text-white px-1.5 py-0.5 rounded">medium</span>'
+          : '<span class="font-mono text-[10px] uppercase tracking-widest bg-ink/20 text-ink/70 px-1.5 py-0.5 rounded">low</span>';
+      return '<label class="flex items-start gap-2.5 cursor-pointer rounded-lg px-2 py-1.5 hover:bg-paper">' +
+        '<input type="checkbox" class="pack-check mt-0.5 shrink-0" data-forget="' + esc(it.name) + '"' + (checked ? ' checked' : '') + '>' +
+        '<span class="flex-1 text-sm' + (checked ? ' line-through text-ink/40' : '') + '">' + esc(it.name) +
+        '<span class="block text-[11px] text-ink/50 font-mono">' + esc(it.tip) + '</span></span>' + badge + '</label>';
+    }).join('');
+  }
+
+  function renderWeight(plan, effCats) {
+    var flat = flattenItems(effCats);
+    var kg = weightEstimate(flat, plan.travelers);
+    var verdict = weightVerdict(kg, $('in-allowance').value);
+    $('weight-total').textContent = kg;
+    $('weight-travelers').textContent = plan.travelers;
+    $('weight-allowance-echo').textContent = $('in-allowance').value || '—';
+    var stamp = $('weight-stamp');
+    if (!verdict.set) {
+      stamp.textContent = 'NO LIMIT SET';
+      stamp.className = 'stamp blue text-base';
+    } else if (verdict.over) {
+      stamp.textContent = 'OVERWEIGHT';
+      stamp.className = 'stamp text-base';
+    } else {
+      stamp.textContent = 'CLEARED';
+      stamp.className = 'stamp green text-base';
+    }
+    $('weight-msg').textContent = verdict.message;
+  }
+
+  function renderLaundry(plan) {
+    var box = $('laundry-result');
+    var L = plan.laundryDays;
+    if (!L || L <= 0) {
+      box.innerHTML = '<p class="font-mono text-sm">Set <strong>“Laundry every (days)”</strong> above 0 in Stub A and watch clothing quantities shrink. ' +
+        'Example: a 10-day trip with laundry every 3 days needs only ~3 sets of daily-wear instead of 10.</p>';
+      return;
+    }
+    if (L >= plan.days) {
+      box.innerHTML = '<p class="font-mono text-sm">Laundry every ' + L + ' days on a ' + plan.days + '-day trip changes nothing — the whole trip fits in one wash cycle. Try a smaller number.</p>';
+      return;
+    }
+    var s = plan.laundry;
+    var list = s.shrunk.map(function (r) {
+      return '<li class="font-mono text-sm">✂ ' + esc(r.name) + ': <strong>' + r.from + ' → ' + r.to + '</strong></li>';
+    }).join('');
+    box.innerHTML =
+      '<div class="flex flex-wrap gap-6 mb-3">' +
+      '<div><p class="font-display font-bold text-4xl text-packred">' + s.itemsRemoved + '</p><p class="font-mono text-[11px] uppercase tracking-widest text-ink/60">fewer items</p></div>' +
+      '<div><p class="font-display font-bold text-4xl text-packblue">' + s.weightSavedKg + ' kg</p><p class="font-mono text-[11px] uppercase tracking-widest text-ink/60">weight saved</p></div>' +
+      '</div><ul class="space-y-1">' + list + '</ul>' +
+      '<p class="mt-3 text-sm italic text-ink/60">Laundry every ' + L + ' days on a ' + plan.days + '-day trip.</p>';
+  }
+
+  function renderPrintSheet(plan, effCats) {
+    var style = plan.style.name, climate = plan.climate.name;
+    $('print-meta').textContent = plan.days + ' days · ' + style + ' · ' + climate + ' · ' + plan.travelers + ' traveler(s)';
+    $('print-lists').innerHTML = effCats.map(function (c) {
+      return '<h3 style="font-family:Oswald,sans-serif;margin:10px 0 4px">' + esc(c.icon) + ' ' + esc(c.category) + '</h3><ul style="list-style:none;padding:0;margin:0">' +
+        c.items.map(function (it) {
+          return '<li style="font-size:13px;margin:2px 0">☐ ' + esc(it.name) + (it.qty > 1 ? ' ×' + it.qty : '') + '</li>';
+        }).join('') + '</ul>';
+    }).join('');
+    $('print-forget').innerHTML = '<ul style="list-style:none;padding:0">' +
+      forgottenItems().map(function (it) { return '<li style="font-size:13px">☐ ' + esc(it.name) + '</li>'; }).join('') + '</ul>';
+    $('print-weight').textContent = 'Estimated weight: ' + weightEstimate(flattenItems(effCats), plan.travelers) + ' kg · ' +
+      'Liquids total: ' + plan.liquids.totalMl + ' ml (' + (plan.liquids.ok ? '3-1-1 OK' : 'check violations') + ')';
+  }
+
+  function render() {
+    var opts = readOpts();
+    var note = [];
+    var daysRaw = $('in-days').value;
+    if (daysRaw === '' || +daysRaw < 1) note.push('Trip days look empty — using 7.');
+    if ($('in-travelers').value === '' || +$('in-travelers').value < 1) note.push('Travelers look empty — using 1.');
+    var tn = $('trip-note');
+    if (note.length) { tn.textContent = note.join(' '); tn.classList.remove('hidden'); }
+    else tn.classList.add('hidden');
+
+    var plan = planTrip(opts);
+    renderCapsule();
+    renderSuggest(plan);
+    renderList(plan);
+    var effCats = effectiveCats(plan);
+    renderLiquids(plan);
+    renderWeight(plan, effCats);
+    renderLaundry(plan);
+    renderPrintSheet(plan, effCats);
+    saveState();
+  }
+
+  function copyList() {
+    var plan = planTrip(readOpts());
+    var effCats = effectiveCats(plan);
+    var lines = ['PACKLY PACKING LIST — ' + plan.days + ' days, ' + plan.style.name + ', ' + plan.climate.name, ''];
+    effCats.forEach(function (c) {
+      lines.push('[' + c.category.toUpperCase() + ']');
+      c.items.forEach(function (it) {
+        lines.push((state.checked[it.name] ? '[x] ' : '[ ] ') + it.name + (it.qty > 1 ? ' ×' + it.qty : ''));
+      });
+      lines.push('');
+    });
+    lines.push('Estimated weight: ' + plan.weightKg + ' kg · Made with Packly');
+    var text = lines.join('\n');
+    function done() {
+      var n = $('copy-note');
+      n.classList.remove('hidden');
+      setTimeout(function () { n.classList.add('hidden'); }, 2000);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function () { fallbackCopy(text); done(); });
+    } else { fallbackCopy(text); done(); }
+  }
+
+  function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    var hd = $('hero-date');
+    if (hd) { var d = new Date(); hd.textContent = d.getFullYear() + String(d.getMonth() + 1).padStart(2, '0') + String(d.getDate()).padStart(2, '0'); }
+
+    loadState();
+
+    ['in-days', 'in-style', 'in-climate', 'in-travelers', 'in-laundry', 'in-allowance',
+     'f-beach', 'f-business', 'f-laptop', 'f-camera', 'f-adventure', 'f-baby'
+    ].forEach(function (id) {
+      var el = $(id);
+      if (el) el.addEventListener('input', render);
+      if (el) el.addEventListener('change', render);
+    });
+    ['cap-tops', 'cap-bottoms', 'cap-layers'].forEach(function (id) {
+      $(id).addEventListener('input', function () { state.capsuleTouched = true; renderCapsule(); });
+    });
+    $('btn-capsule-suggest').addEventListener('click', function () {
+      var s = capsuleSuggest($('in-days').value, $('in-style').value);
+      $('cap-tops').value = s.tops;
+      $('cap-bottoms').value = s.bottoms;
+      $('cap-layers').value = s.layers;
+      state.capsuleTouched = true;
+      renderCapsule();
+      renderSuggest(planTrip(readOpts()));
+    });
+
+    document.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t.matches('[data-item]') && t.type === 'checkbox') {
+        if (t.checked) state.checked[t.getAttribute('data-item')] = true;
+        else delete state.checked[t.getAttribute('data-item')];
+        render();
+      }
+      if (t.matches('[data-forget]')) {
+        if (t.checked) state.forgetChecked[t.getAttribute('data-forget')] = true;
+        else delete state.forgetChecked[t.getAttribute('data-forget')];
+        saveState();
+      }
+      if (t.matches('[data-liq]')) {
+        var nm = t.getAttribute('data-liq');
+        var v = Math.max(1, Math.min(1000, Math.round(+t.value || 0)));
+        var custom = state.customLiquids.find(function (l) { return l.name === nm; });
+        if (custom) custom.volumeMl = v;
+        else state.liqMl[nm] = v;
+        render();
+      }
+    });
+
+    document.addEventListener('click', function (e) {
+      var q = e.target.closest('[data-q]');
+      if (q) {
+        var name = q.getAttribute('data-item');
+        var cur = state.qty[name] || currentQty(name);
+        var next = Math.max(1, Math.min(20, cur + (+q.getAttribute('data-q'))));
+        state.qty[name] = next;
+        render();
+        return;
+      }
+      var del = e.target.closest('[data-liq-del]');
+      if (del) {
+        var nm = del.getAttribute('data-liq-del');
+        state.customLiquids = state.customLiquids.filter(function (l) { return l.name !== nm; });
+        render();
+      }
+    });
+
+    function currentQty(name) {
+      var plan = planTrip(readOpts());
+      var found = 1;
+      plan.categories.forEach(function (c) {
+        c.items.forEach(function (it) { if (it.name === name) found = it.qty; });
+      });
+      return found;
+    }
+
+    $('btn-print').addEventListener('click', function () { window.print(); });
+    $('btn-copy').addEventListener('click', copyList);
+    $('btn-reset').addEventListener('click', function () {
+      state.checked = {}; state.qty = {}; state.forgetChecked = {};
+      render();
+    });
+    $('btn-liq-add').addEventListener('click', function () {
+      var name = $('liq-name').value.trim();
+      var ml = Math.round(+$('liq-ml').value || 0);
+      var note = $('liq-note');
+      if (!name) { note.textContent = 'Give the liquid a name first.'; note.classList.remove('hidden'); return; }
+      if (!(ml >= 1 && ml <= 1000)) { note.textContent = 'Enter a volume between 1 and 1000 ml.'; note.classList.remove('hidden'); return; }
+      note.classList.add('hidden');
+      var existing = state.customLiquids.find(function (l) { return l.name.toLowerCase() === name.toLowerCase(); });
+      if (existing) existing.volumeMl = ml;
+      else state.customLiquids.push({ name: name, volumeMl: ml });
+      $('liq-name').value = '';
+      $('liq-ml').value = '';
+      render();
+    });
+
+    if (!state.capsuleTouched) {
+      var s0 = capsuleSuggest($('in-days').value, $('in-style').value);
+      $('cap-tops').value = s0.tops;
+      $('cap-bottoms').value = s0.bottoms;
+      $('cap-layers').value = s0.layers;
+    }
+    renderForget();
+    render();
+  });
+})();
+</script>
+
+<!-- ============ BOTTOM AD (verbatim) ============ -->
+<div class="no-print mx-auto max-w-6xl px-4 sm:px-6 pb-4" role="complementary" aria-label="Advertisement">
+  <div class="mx-auto text-center" style="max-width:728px">
+    <span class="block text-[10px] tracking-[0.18em] uppercase text-slate-400 mb-1.5">Advertisement</span>
+    <div class="flex justify-center overflow-hidden">
+      <script async src="https://js.wpadmngr.com/static/adManager.js" data-admpid="464498"></script>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SEO ARTICLE ============ -->
+<article id="seo-article" class="mx-auto max-w-4xl px-4 sm:px-6 pb-10 text-[15px] leading-relaxed text-ink/85">
+  <h2 class="font-display font-bold text-3xl mt-8 mb-4">The Complete Guide to Packing Lists: Never Forget Anything Again</h2>
+  <p>Every traveler knows the feeling: you are halfway to the airport when the doubt creeps in. Did I pack the charger? The passport? The prescription? A <strong>packing list generator</strong> exists to kill that feeling before it starts. Instead of relying on memory — the least reliable travel companion — you answer a few questions about your trip and get a complete, categorized <strong>what to pack checklist</strong> that covers documents, clothing, toiletries, electronics, health essentials, and the easy-to-forget extras.</p>
+  <p>This guide explains how smart packing lists work, why the capsule-wardrobe method lets you pack half the clothes, what the 3-1-1 liquids rule really means, which items travelers forget most often, how to estimate luggage weight against your airline allowance, and how a mid-trip laundry day can shrink your suitcase dramatically. By the end, you will have a repeatable system — and a <strong>travel packing checklist printable</strong> you can reuse for every trip.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">What is a packing list generator?</h3>
+  <p>A packing list generator is a free online tool that builds a personalized packing checklist from your trip details: how many days you are traveling, the climate at your destination, your travel style, and extras like beach days, business meetings, or a baby in tow. The Packly packing list generator above goes further than a static list. It calculates clothing quantities from your trip length, applies capsule-wardrobe outfit math so you pack fewer pieces, checks your liquids against the 3-1-1 rule, estimates total bag weight versus your airline allowance, flags the items travelers forget most, and recalculates everything when you plan a laundry day mid-trip.</p>
+  <p>Why does this matter? Research on prospective memory — remembering to do things in the future — consistently shows that offloading intentions onto an external list dramatically improves follow-through. A what to pack checklist is not just a convenience; it is a memory prosthetic. The night before a flight, when your brain is juggling check-in times and taxi bookings, a generated list does the remembering for you.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">The capsule wardrobe: outfit math that halves your suitcase</h3>
+  <p>The single biggest space-saver in modern packing is the capsule wardrobe. The idea is simple: instead of packing one outfit per day, you pack a small set of interchangeable tops, bottoms, and layers where everything matches everything. The math is multiplicative, not additive. With <em>t</em> tops, <em>b</em> bottoms, and <em>l</em> layers, the number of distinct outfits is <strong>t × b × (l + 1)</strong> — the layer is optional, so it multiplies your combinations rather than merely adding to them.</p>
+  <p>Run the numbers: 4 tops, 3 bottoms, and 1 layer produce 4 × 3 × 2 = 24 outfits from just 8 pieces of clothing. That covers a week-long trip with room to spare, and it is why the Packly capsule planner suggests a compact wardrobe sized to your trip length and style, complete with a coordinated colour palette. Two neutrals plus one accent colour is the classic formula: white, navy, and charcoal for business; white, olive, and denim blue for a city break. When every top matches every bottom, getting dressed takes thirty seconds and every combination looks intentional.</p>
+  <p>The capsule approach also fixes the most common packing mistake: packing for fantasy scenarios. Most over-packers fill their bag with "just in case" outfits for events that never happen. A capsule forces discipline — if a piece does not combine with at least three others, it stays home.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">The 3-1-1 liquids rule, explained properly</h3>
+  <p>For cabin baggage on most international flights, liquids, gels, and aerosols follow the 3-1-1 rule: each container must hold no more than <strong>3.4 ounces (100 ml)</strong>, all containers must fit inside <strong>one quart-size (roughly 1 litre) clear zip bag</strong>, and each passenger gets <strong>one</strong> such bag. The rule counts the container size, not how full it is — a half-empty 200 ml bottle is still a violation.</p>
+  <p>Common trip-ups: full-size shampoo, sunscreen over 100 ml, and contact lens solution in the big bottle. The Packly 3-1-1 liquids planner totals the volume of every liquid on your list and flags any container over 100 ml or a combined volume over one litre, so you can decant into travel bottles before you reach security. Pro tip: solid alternatives — bar shampoo, solid deodorant, sunscreen sticks — skip the liquids rule entirely and never leak.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">What travelers forget most (and how to beat it)</h3>
+  <p>Ask frequent flyers what they have left behind and the same culprits appear again and again: the phone charger, the travel adapter, prescription medication, the passport itself, contact lenses, headphones, sunglasses, and the humble toothbrush. These are not random lapses. They are the items you use right up until departure — the charger is in the wall until the last minute — or the items with no visual cue in your packing flow.</p>
+  <p>Two systems defeat forgetfulness. First, a dedicated forget-risk checklist, ticked separately from the main list, so high-risk items get a second pass. Second, the "pack it last, check it first" rule for items in active use: charger, toothbrush, and medications go into the bag in the final sweep, and you verify them against the list at the door. Packly's Stub E keeps the twelve most-forgotten items on a separate, risk-ranked checklist for exactly this reason.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">Luggage weight vs. airline allowance</h3>
+  <p>Excess baggage fees are among the most avoidable costs in travel — a few kilograms over can cost more than the budget flight itself. Allowances vary wildly: 7 kg for many Asian low-cost carriers' cabin bags, 10 kg for European ones, 20–23 kg for checked bags on full-service airlines. The only safe move is to estimate before you leave.</p>
+  <p>A realistic weight estimate multiplies each item's typical weight by its quantity. Seven days of mild-weather clothing lands around 5 kg; add a kilogram of toiletries, a kilogram of electronics, and nearly two kilograms of "extras" like a daypack and travel pillow, and a one-week bag easily reaches 9–10 kg — right at the cabin limit. Packly estimates your total from every item on your list, multiplies by the number of travelers, and stamps a verdict against the allowance you enter: CLEARED or OVERWEIGHT, with exactly how many kilograms to cut. When you are over, the fastest wins are heavy shoes worn instead of packed, the travel pillow clipped outside, and decanting toiletries.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">The laundry trick: pack for the wash cycle, not the trip</h3>
+  <p>Here is the math that changes long trips: if you do laundry every 3 days, you only need 3 days' worth of daily-wear clothing, whether the trip is 10 days or 30. The formula is simple — quantity equals the laundry cycle length multiplied by the wear rate, not the trip length. Underwear at one per day with laundry every 3 days means 3 pairs, not 10.</p>
+  <p>This is why experienced long-term travelers carry a week's clothing maximum and plan wash days. Hotel sinks, laundromats, and laundry services exist everywhere; a 3 kg bag for a month beats a 12 kg bag every time. Packly's laundry-day recalculator shows exactly which items shrink, by how much, and how many kilograms you save — on a 14-day trip with laundry every 4 days, expect to drop roughly a third of the clothing weight.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">Packing by climate and trip type</h3>
+  <p>Climate changes the list more than duration does. Hot climates demand sun protection, breathable fabrics, and sandals; cold climates demand insulation layers where each piece is heavier and bulkier — a winter coat alone can weigh a kilogram. Mild climates are the trickiest because of variability, which is why layers beat single heavy pieces: a light fleece plus a rain shell covers more scenarios than one bulky jacket.</p>
+  <p>Trip type adds its own modules. Business travel needs a blazer, dress shirts, and proper shoes — but one blazer over the capsule still multiplies outfits. Beach trips need two swimsuits (one dries while you wear the other) and a quick-dry towel. Adventure travel swaps fashion for function: hiking boots, quick-dry socks, a headlamp. Traveling with a baby is a category of its own — roughly six diapers per day, wipes, and spare outfits, because babies operate on their own packing logic.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">Carry-on vs. checked: the strategic split</h3>
+  <p>What goes where matters as much as what goes. The rule: anything you cannot afford to lose — or cannot buy at 2 a.m. in a foreign airport — goes in the cabin. That means documents, medications, chargers, valuables, and one full change of clothes in case checked bags go astray. Liquids over 100 ml, sharp objects, and bulky "maybe" items go in checked luggage. If you are traveling carry-on only, the 3-1-1 planner and the weight verdict above are not optional extras — they are the whole game.</p>
+
+  <h3 class="font-display font-semibold text-2xl mt-8 mb-3">How to use your printable travel packing checklist</h3>
+  <p>A list only works if you use it at packing time, not just planning time. Print your travel packing checklist printable and work category by category, ticking items as they physically go into the bag — not as you think of them. Pack in reverse order of need: the things you will want first at the destination go on top. Do a final door-step sweep against the forget-risk list: charger, adapter, meds, passport, glasses. Save your trip setup in Packly (it remembers your inputs on your device) and the next trip of the same type takes ten seconds to regenerate.</p>
+  <p>Packing well is a skill, but it is mostly a system: generate the list, trust the outfit math, respect the liquids rule, weigh before you go, and let laundry do the heavy lifting. Do that, and the only surprise at the airport will be how light your bag feels.</p>
+</article>
+
+<!-- ============ FAQS ============ -->
+<section class="no-print mx-auto max-w-4xl px-4 sm:px-6 pb-12" aria-label="Frequently asked questions">
+  <h2 class="font-display font-bold text-3xl mb-6">Frequently asked questions</h2>
+  <div class="space-y-3">
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">What is a packing list generator?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">A packing list generator is a free tool that builds a personalized what-to-pack checklist from your trip details — days, climate, travel style, and extras like beach days or business meetings. Packly goes further: it calculates clothing quantities, applies capsule-wardrobe outfit math, checks liquids against the 3-1-1 rule, estimates bag weight versus your airline allowance, and recalculates everything when you plan laundry mid-trip.</p>
+    </details>
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">How many outfits can I make from a capsule wardrobe?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">Multiply tops × bottoms × (layers + 1). For example, 4 tops, 3 bottoms, and 1 layer give 4 × 3 × 2 = 24 distinct outfits from just 8 pieces. The key is a coordinated colour palette — two neutrals plus one accent — so every top matches every bottom. Packly's capsule planner suggests a wardrobe sized to your trip length and shows the outfit count instantly.</p>
+    </details>
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">What is the 3-1-1 liquids rule for flights?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">Each liquid container must be 3.4 oz (100 ml) or smaller, all containers must fit in one quart-size (about 1 litre) clear zip bag, and each passenger is allowed one bag. The limit applies to container size, not how full it is. Packly's liquids planner totals your liquids' volume and flags any container over 100 ml or a combined volume over one litre.</p>
+    </details>
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">How do I estimate my luggage weight before flying?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">Multiply each item's typical weight by its quantity and add them up — or let Packly do it automatically from your checklist. A week of mild-weather clothing is roughly 5 kg; toiletries, electronics, and extras typically add another 4–5 kg. Compare the total against your airline's allowance (often 7–10 kg cabin, 20–23 kg checked) to avoid excess baggage fees.</p>
+    </details>
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">How does doing laundry on a trip reduce what I pack?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">You pack for the wash cycle, not the trip: quantity = laundry interval × daily wear rate. With laundry every 3 days, you need about 3 sets of daily-wear clothing whether the trip is 10 days or 30. Packly's laundry-day recalculator shows exactly which clothing items shrink, how many pieces you drop, and the kilograms saved.</p>
+    </details>
+    <details class="rounded-xl border border-ink/15 bg-white px-5 py-4">
+      <summary class="font-display font-semibold text-lg cursor-pointer">Can I print my packing checklist?</summary>
+      <p class="mt-2 text-[15px] text-ink/80">Yes. Click "Print checklist" in the tool to get a clean, print-friendly page with your full categorized list, the most-forgotten items to double-check, your estimated weight, and liquids compliance. You can also copy the list as text to paste into notes or share with travel companions. Everything runs in your browser — no signup needed.</p>
+    </details>
+  </div>
+</section>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a packing list generator?",
+      "acceptedAnswer": { "@type": "Answer", "text": "A packing list generator is a free tool that builds a personalized what-to-pack checklist from your trip details — days, climate, travel style, and extras like beach days or business meetings. Packly goes further: it calculates clothing quantities, applies capsule-wardrobe outfit math, checks liquids against the 3-1-1 rule, estimates bag weight versus your airline allowance, and recalculates everything when you plan laundry mid-trip." }
+    },
+    {
+      "@type": "Question",
+      "name": "How many outfits can I make from a capsule wardrobe?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Multiply tops × bottoms × (layers + 1). For example, 4 tops, 3 bottoms, and 1 layer give 4 × 3 × 2 = 24 distinct outfits from just 8 pieces. The key is a coordinated colour palette — two neutrals plus one accent — so every top matches every bottom. Packly's capsule planner suggests a wardrobe sized to your trip length and shows the outfit count instantly." }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the 3-1-1 liquids rule for flights?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Each liquid container must be 3.4 oz (100 ml) or smaller, all containers must fit in one quart-size (about 1 litre) clear zip bag, and each passenger is allowed one bag. The limit applies to container size, not how full it is. Packly's liquids planner totals your liquids' volume and flags any container over 100 ml or a combined volume over one litre." }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I estimate my luggage weight before flying?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Multiply each item's typical weight by its quantity and add them up — or let Packly do it automatically from your checklist. A week of mild-weather clothing is roughly 5 kg; toiletries, electronics, and extras typically add another 4–5 kg. Compare the total against your airline's allowance (often 7–10 kg cabin, 20–23 kg checked) to avoid excess baggage fees." }
+    },
+    {
+      "@type": "Question",
+      "name": "How does doing laundry on a trip reduce what I pack?",
+      "acceptedAnswer": { "@type": "Answer", "text": "You pack for the wash cycle, not the trip: quantity = laundry interval × daily wear rate. With laundry every 3 days, you need about 3 sets of daily-wear clothing whether the trip is 10 days or 30. Packly's laundry-day recalculator shows exactly which clothing items shrink, how many pieces you drop, and the kilograms saved." }
+    },
+    {
+      "@type": "Question",
+      "name": "Can I print my packing checklist?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. Click Print checklist in the tool to get a clean, print-friendly page with your full categorized list, the most-forgotten items to double-check, your estimated weight, and liquids compliance. You can also copy the list as text to paste into notes or share with travel companions. Everything runs in your browser — no signup needed." }
+    }
+  ]
+}
+</script>
+
+<!-- ============ FOOTER ============ -->
+<footer class="no-print border-t-2 border-dashed border-packred/40 mt-4">
+  <div class="mx-auto max-w-6xl px-4 sm:px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <p class="font-display font-bold text-xl">Packly <span class="font-mono text-xs font-normal text-ink/50 tracking-widest">· PACK SMART, TRAVEL LIGHT</span></p>
+    <nav class="flex items-center gap-5 text-sm font-mono uppercase tracking-widest">
+      <a href="#top" class="hover:text-packred">Home</a>
+      <a href="https://fixoraa.tech" class="text-packblue hover:text-packred">More Tools</a>
+    </nav>
+  </div>
+  <p class="text-center font-mono text-[11px] text-ink/40 pb-6">Free forever · No signup · Your list never leaves your browser</p>
+</footer>
+</body>
+</html>
